@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message;
+
+option go_package = "github.com/afairon/smeter/internal/message";
+
+message Device {
+    int64 ID = 1;
+    string Name = 2;
+    bool Active = 3;
+}

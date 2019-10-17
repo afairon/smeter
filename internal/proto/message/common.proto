@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message;
+
+option go_package = "github.com/afairon/smeter/internal/message";
+
+enum Status {
+    ALL = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+}
