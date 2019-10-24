@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package service;
+
+import "message/sensor.proto";
+
+// SensorService definition
+service SensorService {
+    rpc Add(message.Sensor) returns (message.Sensor);
+}
