@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package service;
+
+import "message/device.proto";
+
+// DeviceService definition
+service DeviceService{
+    rpc Add(message.Device) returns (message.Device);
+}
