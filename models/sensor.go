@@ -38,3 +38,29 @@ func AddSensor(db *sql.DB, sensor *message.Sensor) error {
 
 	return err
 }
+
+// GetSensor retrieves sensor.
+func GetSensor(db *sql.DB, sensor *message.Sensor) (*message.Sensor, error) {
+	const sql = `
+		SELECT
+			id,
+			device_id,
+			type,
+			name,
+			active
+		FROM
+			public.sensors
+		WHERE
+			sensors.id = $1
+	`
+
+	sensorID := sensor.GetID()
+
+	row := db.QueryRow(sql, sensorID)
+
+	if err := row.Scan(&(*sensor).ID, &(*sensor).DeviceID, &(*sensor).Type, &(*sensor).Name, &(*sensor).Active); err != nil {
+		return nil, err
+	}
+
+	return sensor, nil
+}

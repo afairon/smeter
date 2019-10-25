@@ -32,3 +32,27 @@ func AddDevice(db *sql.DB, device *message.Device) error {
 
 	return err
 }
+
+// GetDevice retrieves device.
+func GetDevice(db *sql.DB, device *message.Device) (*message.Device, error) {
+	const sql = `
+		SELECT
+			id,
+			name,
+			active
+		FROM
+			public.devices
+		WHERE
+			devices.id = $1
+	`
+
+	deviceID := device.GetID()
+
+	row := db.QueryRow(sql, deviceID)
+
+	if err := row.Scan(&(*device).ID, &(*device).Name, &(*device).Active); err != nil {
+		return nil, err
+	}
+
+	return device, nil
+}
