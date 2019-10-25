@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package service;
+
+import "message/power.proto";
+
+// PowerService definition
+service PowerService{
+    rpc Add(message.Power) returns (message.Power);
+}

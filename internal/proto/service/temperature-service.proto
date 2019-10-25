@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package service;
+
+import "message/temperature.proto";
+
+// TemperatureService definition
+service TemperatureService{
+    rpc Add(message.Temperature) returns (message.Temperature);
+}

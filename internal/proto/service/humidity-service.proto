@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package service;
+
+import "message/humidity.proto";
+
+// HumidityService definition
+service HumidityService{
+    rpc Add(message.Humidity) returns (message.Humidity);
+}
