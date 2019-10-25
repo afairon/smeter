@@ -10,9 +10,10 @@ CREATE TABLE IF NOT EXISTS public.devices
 
 /* List of sensors attached to device
     Type:
-        - 0: Power
-        - 1: Temperature
-        - 2: Humidity
+        - 0: Unknown
+        - 1: Power
+        - 2: Temperature
+        - 3: Humidity
 */
 CREATE TABLE IF NOT EXISTS public.sensors
 (
