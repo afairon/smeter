@@ -29,7 +29,16 @@ func AddPower(db *sql.DB, power *message.Power) error {
 	sensorID := power.GetSensorID()
 	value := power.GetValue()
 
-	_, err := db.Exec(sql, timestamp, sensorID, value)
+	// Check if sensor is active and is a sensor of type power.
+	ok, err := SensorActive(db, message.SensorType_POWER, sensorID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotFound
+	}
+
+	_, err = db.Exec(sql, timestamp, sensorID, value)
 
 	return err
 }

@@ -29,6 +29,10 @@ func AddSensor(db *sql.DB, sensor *message.Sensor) error {
 	sensorType := sensor.GetType()
 	name := sensor.GetName()
 
+	if sensorType == message.SensorType_UNKOWN {
+		return ErrUnknownSensorType
+	}
+
 	// Check if name is empty
 	if strings.TrimSpace(name) == "" {
 		return ErrInvalidName
@@ -63,4 +67,31 @@ func GetSensor(db *sql.DB, sensor *message.Sensor) (*message.Sensor, error) {
 	}
 
 	return sensor, nil
+}
+
+// SensorActive checks if the sensor is active.
+func SensorActive(db *sql.DB, sensorType message.SensorType, id int64) (bool, error) {
+	const sql = `
+			SELECT EXISTS
+				(
+					SELECT
+						1
+					FROM
+						public.sensors
+					WHERE
+						sensors.type = $1
+					AND
+						sensors.id = $2
+					AND
+						sensors.active = true
+				)
+	`
+
+	var res bool
+	row := db.QueryRow(sql, sensorType, id)
+	if err := row.Scan(&res); err != nil {
+		return false, err
+	}
+
+	return res, nil
 }

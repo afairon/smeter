@@ -56,3 +56,28 @@ func GetDevice(db *sql.DB, device *message.Device) (*message.Device, error) {
 
 	return device, nil
 }
+
+// DeviceActive checks if the device is active.
+func DeviceActive(db *sql.DB, id int64) (bool, error) {
+	const sql = `
+			SELECT EXISTS
+				(
+					SELECT
+						1
+					FROM
+						public.devices
+					WHERE
+						devices.id = $1
+					AND
+						devices.active = true
+				)
+	`
+
+	var res bool
+	row := db.QueryRow(sql, id)
+	if err := row.Scan(&res); err != nil {
+		return false, err
+	}
+
+	return res, nil
+}

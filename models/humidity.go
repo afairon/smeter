@@ -29,7 +29,16 @@ func AddHumidity(db *sql.DB, humidity *message.Humidity) error {
 	sensorID := humidity.GetSensorID()
 	value := humidity.GetValue()
 
-	_, err := db.Exec(sql, timestamp, sensorID, value)
+	// Check if sensor is active and is a sensor of type humidity.
+	ok, err := SensorActive(db, message.SensorType_HUMIDITY, sensorID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotFound
+	}
+
+	_, err = db.Exec(sql, timestamp, sensorID, value)
 
 	return err
 }

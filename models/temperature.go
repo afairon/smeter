@@ -29,7 +29,16 @@ func AddTemperature(db *sql.DB, temperature *message.Temperature) error {
 	sensorID := temperature.GetSensorID()
 	value := temperature.GetValue()
 
-	_, err := db.Exec(sql, timestamp, sensorID, value)
+	// Check if sensor is active and is a sensor of type temperature.
+	ok, err := SensorActive(db, message.SensorType_TEMPERATURE, sensorID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotFound
+	}
+
+	_, err = db.Exec(sql, timestamp, sensorID, value)
 
 	return err
 }
