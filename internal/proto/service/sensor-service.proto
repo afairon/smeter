@@ -7,4 +7,5 @@ import "message/sensor.proto";
 // SensorService definition
 service SensorService {
     rpc Add(message.Sensor) returns (message.Sensor);
+    rpc Get(message.SensorRequest) returns (stream message.Sensor);
 }

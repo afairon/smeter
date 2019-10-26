@@ -69,6 +69,55 @@ func GetSensor(db *sql.DB, sensor *message.Sensor) (*message.Sensor, error) {
 	return sensor, nil
 }
 
+// GetSensors returns list of sensors.
+func GetSensors(db *sql.DB, sensorReq *message.SensorRequest) ([]*message.Sensor, error) {
+	const sql = `
+		SELECT
+			id,
+			device_id,
+			type,
+			name,
+			active
+		FROM
+			public.sensors
+		WHERE
+			sensors.device_id = $1
+		LIMIT
+			$2
+		OFFSET
+			$3
+	`
+
+	deviceID := sensorReq.GetDeviceID()
+	limit := sensorReq.GetLimit()
+	offset := sensorReq.GetOffset()
+
+	if limit > 100 || limit < 1 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	var sensors []*message.Sensor
+
+	row, err := db.Query(sql, deviceID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		sensor := message.Sensor{}
+		err = row.Scan(&sensor.ID, &sensor.DeviceID, &sensor.Type, &sensor.Name, &sensor.Active)
+		if err != nil {
+			return nil, err
+		}
+		sensors = append(sensors, &sensor)
+	}
+
+	return sensors, nil
+}
+
 // SensorActive checks if the sensor is active.
 func SensorActive(db *sql.DB, sensorType message.SensorType, id int64) (bool, error) {
 	const sql = `
