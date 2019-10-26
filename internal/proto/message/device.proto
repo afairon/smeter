@@ -9,3 +9,8 @@ message Device {
     string Name = 2;
     bool Active = 3;
 }
+
+message DevicesRequest {
+    int64 Limit = 1;
+    int64 Offset = 2;
+}

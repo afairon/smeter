@@ -7,4 +7,5 @@ import "message/device.proto";
 // DeviceService definition
 service DeviceService{
     rpc Add(message.Device) returns (message.Device);
+    rpc Get(message.DevicesRequest) returns (stream message.Device);
 }

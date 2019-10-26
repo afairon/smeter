@@ -57,6 +57,50 @@ func GetDevice(db *sql.DB, device *message.Device) (*message.Device, error) {
 	return device, nil
 }
 
+// GetDevices returns list of devices.
+func GetDevices(db *sql.DB, devicesReq *message.DevicesRequest) ([]*message.Device, error) {
+	const sql = `
+		SELECT
+			id,
+			name,
+			active
+		FROM
+			public.devices
+		LIMIT
+			$1
+		OFFSET
+			$2
+	`
+
+	limit := devicesReq.GetLimit()
+	offset := devicesReq.GetOffset()
+
+	if limit > 100 || limit < 1 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	var devices []*message.Device
+
+	row, err := db.Query(sql, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		device := message.Device{}
+		err = row.Scan(&device.ID, &device.Name, &device.Active)
+		if err != nil {
+			return nil, err
+		}
+		devices = append(devices, &device)
+	}
+
+	return devices, nil
+}
+
 // DeviceActive checks if the device is active.
 func DeviceActive(db *sql.DB, id int64) (bool, error) {
 	const sql = `
