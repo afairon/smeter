@@ -7,4 +7,5 @@ import "message/humidity.proto";
 // HumidityService definition
 service HumidityService{
     rpc Add(message.Humidity) returns (message.Humidity);
+    rpc GetAvgHumidity(message.HumidityRequest) returns (stream message.Humidity);
 }

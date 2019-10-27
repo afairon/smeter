@@ -7,4 +7,5 @@ import "message/power.proto";
 // PowerService definition
 service PowerService{
     rpc Add(message.Power) returns (message.Power);
+    rpc GetAvgConsumption(message.ConsumptionRequest) returns (stream message.Energy);
 }
