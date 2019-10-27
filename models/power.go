@@ -44,6 +44,50 @@ func AddPower(db *sql.DB, power *message.Power) error {
 	return err
 }
 
+// GetPower returns power metrics.
+func GetPower(db *sql.DB, powerReq *message.PowerRequest) ([]*message.Power, error) {
+	const sql = `
+		SELECT
+			time,
+			sensor_id,
+			value
+		FROM
+			public.power_metrics
+		WHERE
+			sensor_id = $1
+		AND
+			time >= $2
+		AND
+			time < $3
+		ORDER BY
+			time desc
+	`
+
+	sensorID := powerReq.GetSensorID()
+	from := time.Unix(powerReq.GetFrom(), 0)
+	to := time.Unix(powerReq.GetTo(), 0)
+
+	row, err := db.Query(sql, sensorID, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	var lstPowers []*message.Power
+
+	for row.Next() {
+		power := message.Power{}
+		timestamp := time.Time{}
+		err = row.Scan(&timestamp, &power.SensorID, &power.Value)
+		if err != nil {
+			return nil, err
+		}
+		power.Time = timestamp.Unix()
+		lstPowers = append(lstPowers, &power)
+	}
+
+	return lstPowers, nil
+}
+
 // GetAvgConsumption returns a bucket of average energy consumption.
 func GetAvgConsumption(db *sql.DB, consumptionReq *message.ConsumptionRequest) ([]*message.Energy, error) {
 	const sql = `

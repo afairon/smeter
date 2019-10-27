@@ -18,6 +18,12 @@ message Energy {
     double Value = 3;
 }
 
+message PowerRequest {
+    int64 SensorID = 1;
+    int64 From = 2;
+    int64 To = 3;
+}
+
 message ConsumptionRequest {
     int64 SensorID = 1;
     int64 From = 2;
