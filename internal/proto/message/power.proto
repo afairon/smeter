@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package message;
 
-import "message/common.proto";
+import "common.proto";
 
 option go_package = "github.com/afairon/smeter/internal/message";
 

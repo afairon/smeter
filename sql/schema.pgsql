@@ -1,5 +1,3 @@
-BEGIN;
-
 /* List of devices */
 CREATE TABLE IF NOT EXISTS public.devices
 (
@@ -8,23 +6,17 @@ CREATE TABLE IF NOT EXISTS public.devices
     active BOOL NOT NULL DEFAULT true
 );
 
-/* List of sensors attached to device
-    Type:
-        - 0: Unknown
-        - 1: Power
-        - 2: Temperature
-        - 3: Humidity
-*/
+/* List of sensors attached to device */
 CREATE TABLE IF NOT EXISTS public.sensors
 (
     id BIGSERIAL PRIMARY KEY NOT NULL,
     device_id INT8 NOT NULL REFERENCES public.devices(id) ON DELETE CASCADE,
-    type INT NOT NULL DEFAULT 1,
+    type INT NOT NULL DEFAULT 0,
     name TEXT UNIQUE NOT NULL,
     active BOOL NOT NULL DEFAULT true
 );
 
-CREATE INDEX ON public.sensors(type, device_id, id);
+CREATE INDEX IF NOT EXISTS sensors_type_deviceid_id_idx ON public.sensors(type, device_id, id);
 
 /* Measurements of power */
 CREATE TABLE IF NOT EXISTS public.power_metrics
@@ -34,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.power_metrics
     value DOUBLE PRECISION NOT NULL
 );
 
-CREATE INDEX ON public.power_metrics(sensor_id, time DESC);
+CREATE INDEX IF NOT EXISTS power_metrics_sensorid_time_idx ON public.power_metrics(sensor_id, time DESC);
 
 /* Measurements of temperature */
 CREATE TABLE IF NOT EXISTS public.temperature_metrics
@@ -44,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.temperature_metrics
     value DOUBLE PRECISION NOT NULL
 );
 
-CREATE INDEX ON public.temperature_metrics(sensor_id, time DESC);
+CREATE INDEX IF NOT EXISTS temperature_metrics_sensorid_time_idx ON public.temperature_metrics(sensor_id, time DESC);
 
 /* Measurements of humidity */
 CREATE TABLE IF NOT EXISTS public.humidity_metrics
@@ -54,6 +46,4 @@ CREATE TABLE IF NOT EXISTS public.humidity_metrics
     value DOUBLE PRECISION NOT NULL
 );
 
-CREATE INDEX ON public.humidity_metrics(sensor_id, time DESC);
-
-COMMIT;
+CREATE INDEX IF NOT EXISTS humidity_metrics_sensorid_time_idx ON public.humidity_metrics(sensor_id, time DESC);

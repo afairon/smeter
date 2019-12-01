@@ -5,10 +5,9 @@ package message;
 option go_package = "github.com/afairon/smeter/internal/message";
 
 enum SensorType {
-    UNKOWN = 0;
-    POWER = 1;
-    TEMPERATURE = 2;
-    HUMIDITY = 3;
+    POWER = 0;
+    TEMPERATURE = 1;
+    HUMIDITY = 2;
 }
 
 message Sensor {

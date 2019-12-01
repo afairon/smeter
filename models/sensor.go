@@ -29,10 +29,6 @@ func AddSensor(db *sql.DB, sensor *message.Sensor) error {
 	sensorType := sensor.GetType()
 	name := sensor.GetName()
 
-	if sensorType == message.SensorType_UNKOWN {
-		return ErrUnknownSensorType
-	}
-
 	// Check if name is empty
 	if strings.TrimSpace(name) == "" {
 		return ErrInvalidName
