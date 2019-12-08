@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/afairon/smeter/internal/message"
+	"github.com/afairon/smeter/message"
 )
 
 // AddSensor adds a new sensor to the database.
-func AddSensor(db *sql.DB, sensor *message.Sensor) error {
+func AddSensor(db *sql.DB, req *message.Sensor) error {
 	const sql = `
 		INSERT INTO
 			public.sensors
@@ -25,9 +25,9 @@ func AddSensor(db *sql.DB, sensor *message.Sensor) error {
 			)
 	`
 
-	deviceID := sensor.GetDeviceID()
-	sensorType := sensor.GetType()
-	name := sensor.GetName()
+	deviceID := req.GetDeviceID()
+	sensorType := req.GetType()
+	name := req.GetName()
 
 	// Check if name is empty
 	if strings.TrimSpace(name) == "" {
@@ -40,7 +40,7 @@ func AddSensor(db *sql.DB, sensor *message.Sensor) error {
 }
 
 // GetSensor retrieves sensor.
-func GetSensor(db *sql.DB, sensor *message.Sensor) (*message.Sensor, error) {
+func GetSensor(db *sql.DB, req *message.Sensor) (*message.Sensor, error) {
 	const sql = `
 		SELECT
 			id,
@@ -54,19 +54,19 @@ func GetSensor(db *sql.DB, sensor *message.Sensor) (*message.Sensor, error) {
 			sensors.id = $1
 	`
 
-	sensorID := sensor.GetID()
+	sensorID := req.GetID()
 
 	row := db.QueryRow(sql, sensorID)
 
-	if err := row.Scan(&(*sensor).ID, &(*sensor).DeviceID, &(*sensor).Type, &(*sensor).Name, &(*sensor).Active); err != nil {
+	if err := row.Scan(&(*req).ID, &(*req).DeviceID, &(*req).Type, &(*req).Name, &(*req).Active); err != nil {
 		return nil, err
 	}
 
-	return sensor, nil
+	return req, nil
 }
 
 // GetSensors returns list of sensors.
-func GetSensors(db *sql.DB, sensorReq *message.SensorRequest) ([]*message.Sensor, error) {
+func GetSensors(db *sql.DB, req *message.SensorRequest) (*sql.Rows, error) {
 	const sql = `
 		SELECT
 			id,
@@ -78,15 +78,17 @@ func GetSensors(db *sql.DB, sensorReq *message.SensorRequest) ([]*message.Sensor
 			public.sensors
 		WHERE
 			sensors.device_id = $1
+		ORDER BY
+			id
 		LIMIT
 			$2
 		OFFSET
 			$3
 	`
 
-	deviceID := sensorReq.GetDeviceID()
-	limit := sensorReq.GetLimit()
-	offset := sensorReq.GetOffset()
+	deviceID := req.GetDeviceID()
+	limit := req.GetLimit()
+	offset := req.GetOffset()
 
 	if limit > 100 || limit < 1 {
 		limit = 20
@@ -95,23 +97,12 @@ func GetSensors(db *sql.DB, sensorReq *message.SensorRequest) ([]*message.Sensor
 		offset = 0
 	}
 
-	var sensors []*message.Sensor
-
 	row, err := db.Query(sql, deviceID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for row.Next() {
-		sensor := message.Sensor{}
-		err = row.Scan(&sensor.ID, &sensor.DeviceID, &sensor.Type, &sensor.Name, &sensor.Active)
-		if err != nil {
-			return nil, err
-		}
-		sensors = append(sensors, &sensor)
-	}
-
-	return sensors, nil
+	return row, nil
 }
 
 // SensorActive checks if the sensor is active.

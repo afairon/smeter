@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afairon/smeter/internal/message"
+	"github.com/afairon/smeter/message"
 )
 
 // AddHumidity saves humidity metric to database.
-func AddHumidity(db *sql.DB, humidity *message.Humidity) error {
+func AddHumidity(db *sql.DB, req *message.Humidity) error {
 	const sql = `
 		INSERT INTO
 			public.humidity_metrics
@@ -26,9 +26,9 @@ func AddHumidity(db *sql.DB, humidity *message.Humidity) error {
 			)
 	`
 
-	timestamp := time.Unix(humidity.GetTime(), 0)
-	sensorID := humidity.GetSensorID()
-	value := humidity.GetValue()
+	timestamp := time.Unix(req.GetTime(), 0)
+	sensorID := req.GetSensorID()
+	value := req.GetValue()
 
 	// Check if sensor is active and is a sensor of type humidity.
 	ok, err := SensorActive(db, message.SensorType_HUMIDITY, sensorID)
@@ -45,7 +45,7 @@ func AddHumidity(db *sql.DB, humidity *message.Humidity) error {
 }
 
 // GetAvgHumidity returns a bucket of average humidity.
-func GetAvgHumidity(db *sql.DB, humidityReq *message.HumidityRequest) ([]*message.Humidity, error) {
+func GetAvgHumidity(db *sql.DB, req *message.HumidityRequest) (*sql.Rows, error) {
 	const sql = `
 		SELECT
 			date_trunc($1, time) as bucket,
@@ -66,28 +66,15 @@ func GetAvgHumidity(db *sql.DB, humidityReq *message.HumidityRequest) ([]*messag
 			bucket desc
 	`
 
-	sensorID := humidityReq.GetSensorID()
-	from := time.Unix(humidityReq.GetFrom(), 0)
-	to := time.Unix(humidityReq.GetTo(), 0)
-	bucket := humidityReq.GetBucket()
+	sensorID := req.GetSensorID()
+	from := time.Unix(req.GetFrom(), 0)
+	to := time.Unix(req.GetTo(), 0)
+	bucket := req.GetBucket()
 
 	row, err := db.Query(sql, strings.ToLower(bucket.String()), sensorID, from, to)
 	if err != nil {
 		return nil, err
 	}
 
-	var lstHumidities []*message.Humidity
-
-	for row.Next() {
-		humidity := message.Humidity{}
-		timestamp := time.Time{}
-		err = row.Scan(&timestamp, &humidity.SensorID, &humidity.Value)
-		if err != nil {
-			return nil, err
-		}
-		humidity.Time = timestamp.Unix()
-		lstHumidities = append(lstHumidities, &humidity)
-	}
-
-	return lstHumidities, nil
+	return row, nil
 }

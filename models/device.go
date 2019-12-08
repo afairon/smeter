@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/afairon/smeter/internal/message"
+	"github.com/afairon/smeter/message"
 )
 
 // AddDevice adds a new device to the database.
-func AddDevice(db *sql.DB, device *message.Device) error {
+func AddDevice(db *sql.DB, req *message.Device) error {
 	const sql = `
 		INSERT INTO
 			public.devices
@@ -21,7 +21,7 @@ func AddDevice(db *sql.DB, device *message.Device) error {
 			)
 	`
 
-	name := device.GetName()
+	name := req.GetName()
 
 	// Check if name is empty
 	if strings.TrimSpace(name) == "" {
@@ -34,7 +34,7 @@ func AddDevice(db *sql.DB, device *message.Device) error {
 }
 
 // GetDevice retrieves device.
-func GetDevice(db *sql.DB, device *message.Device) (*message.Device, error) {
+func GetDevice(db *sql.DB, req *message.Device) (*message.Device, error) {
 	const sql = `
 		SELECT
 			id,
@@ -46,19 +46,19 @@ func GetDevice(db *sql.DB, device *message.Device) (*message.Device, error) {
 			devices.id = $1
 	`
 
-	deviceID := device.GetID()
+	deviceID := req.GetID()
 
 	row := db.QueryRow(sql, deviceID)
 
-	if err := row.Scan(&(*device).ID, &(*device).Name, &(*device).Active); err != nil {
+	if err := row.Scan(&(*req).ID, &(*req).Name, &(*req).Active); err != nil {
 		return nil, err
 	}
 
-	return device, nil
+	return req, nil
 }
 
 // GetDevices returns list of devices.
-func GetDevices(db *sql.DB, devicesReq *message.DevicesRequest) ([]*message.Device, error) {
+func GetDevices(db *sql.DB, req *message.DevicesRequest) (*sql.Rows, error) {
 	const sql = `
 		SELECT
 			id,
@@ -66,14 +66,16 @@ func GetDevices(db *sql.DB, devicesReq *message.DevicesRequest) ([]*message.Devi
 			active
 		FROM
 			public.devices
+		ORDER BY
+			id
 		LIMIT
 			$1
 		OFFSET
 			$2
 	`
 
-	limit := devicesReq.GetLimit()
-	offset := devicesReq.GetOffset()
+	limit := req.GetLimit()
+	offset := req.GetOffset()
 
 	if limit > 100 || limit < 1 {
 		limit = 20
@@ -82,23 +84,12 @@ func GetDevices(db *sql.DB, devicesReq *message.DevicesRequest) ([]*message.Devi
 		offset = 0
 	}
 
-	var devices []*message.Device
-
 	row, err := db.Query(sql, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for row.Next() {
-		device := message.Device{}
-		err = row.Scan(&device.ID, &device.Name, &device.Active)
-		if err != nil {
-			return nil, err
-		}
-		devices = append(devices, &device)
-	}
-
-	return devices, nil
+	return row, nil
 }
 
 // DeviceActive checks if the device is active.

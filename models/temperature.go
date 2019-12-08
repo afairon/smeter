@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afairon/smeter/internal/message"
+	"github.com/afairon/smeter/message"
 )
 
 // AddTemperature saves temperature metric to database.
-func AddTemperature(db *sql.DB, temperature *message.Temperature) error {
+func AddTemperature(db *sql.DB, req *message.Temperature) error {
 	const sql = `
 		INSERT INTO
 			public.temperature_metrics
@@ -26,9 +26,9 @@ func AddTemperature(db *sql.DB, temperature *message.Temperature) error {
 			)
 	`
 
-	timestamp := time.Unix(temperature.GetTime(), 0)
-	sensorID := temperature.GetSensorID()
-	value := temperature.GetValue()
+	timestamp := time.Unix(req.GetTime(), 0)
+	sensorID := req.GetSensorID()
+	value := req.GetValue()
 
 	// Check if sensor is active and is a sensor of type temperature.
 	ok, err := SensorActive(db, message.SensorType_TEMPERATURE, sensorID)
@@ -45,7 +45,7 @@ func AddTemperature(db *sql.DB, temperature *message.Temperature) error {
 }
 
 // GetAvgTemperature returns a bucket of average temperature.
-func GetAvgTemperature(db *sql.DB, temperatureReq *message.TemperatureRequest) ([]*message.Temperature, error) {
+func GetAvgTemperature(db *sql.DB, req *message.TemperatureRequest) (*sql.Rows, error) {
 	const sql = `
 		SELECT
 			date_trunc($1, time) as bucket,
@@ -66,28 +66,15 @@ func GetAvgTemperature(db *sql.DB, temperatureReq *message.TemperatureRequest) (
 			bucket desc
 	`
 
-	sensorID := temperatureReq.GetSensorID()
-	from := time.Unix(temperatureReq.GetFrom(), 0)
-	to := time.Unix(temperatureReq.GetTo(), 0)
-	bucket := temperatureReq.GetBucket()
+	sensorID := req.GetSensorID()
+	from := time.Unix(req.GetFrom(), 0)
+	to := time.Unix(req.GetTo(), 0)
+	bucket := req.GetBucket()
 
 	row, err := db.Query(sql, strings.ToLower(bucket.String()), sensorID, from, to)
 	if err != nil {
 		return nil, err
 	}
 
-	var lstTemperatures []*message.Temperature
-
-	for row.Next() {
-		temperature := message.Temperature{}
-		timestamp := time.Time{}
-		err = row.Scan(&timestamp, &temperature.SensorID, &temperature.Value)
-		if err != nil {
-			return nil, err
-		}
-		temperature.Time = timestamp.Unix()
-		lstTemperatures = append(lstTemperatures, &temperature)
-	}
-
-	return lstTemperatures, nil
+	return row, nil
 }

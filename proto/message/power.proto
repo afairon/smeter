@@ -4,7 +4,7 @@ package message;
 
 import "common.proto";
 
-option go_package = "github.com/afairon/smeter/internal/message";
+option go_package = "github.com/afairon/smeter/message";
 
 message Power {
     int64 Time = 1;

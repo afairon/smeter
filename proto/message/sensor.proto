@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package message;
 
-option go_package = "github.com/afairon/smeter/internal/message";
+option go_package = "github.com/afairon/smeter/message";
 
 enum SensorType {
     POWER = 0;
