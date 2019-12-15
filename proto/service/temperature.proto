@@ -7,5 +7,6 @@ import "message/temperature.proto";
 // TemperatureService definition
 service TemperatureService{
     rpc Add(message.Temperature) returns (message.Temperature);
+    rpc GetTemperature(message.TemperatureRequest) returns (stream message.Temperature);
     rpc GetAvgTemperature(message.TemperatureRequest) returns (stream message.Temperature);
 }

@@ -2,14 +2,19 @@ syntax = "proto3";
 
 package message;
 
+import "message/common.proto";
+
 option go_package = "github.com/afairon/smeter/message";
 
+// Types of sensor
 enum SensorType {
-    POWER = 0;
-    TEMPERATURE = 1;
-    HUMIDITY = 2;
+    NONE = 0;
+    POWER = 1;
+    TEMPERATURE = 2;
+    HUMIDITY = 3;
 }
 
+// Humidity message used to create and update
 message Sensor {
     int64 ID = 1;
     int64 DeviceID = 2;
@@ -18,8 +23,23 @@ message Sensor {
     bool Active = 5;
 }
 
-message SensorRequest {
+// Number of sensors
+message SensorCount {
+    int64 Count = 1;
+}
+
+// Request for sensor
+message SensorsRequest {
+    int64 ID = 1;
+    int64 DeviceID = 2;
+    Status Status = 4;
+    int64 Limit = 5;
+    int64 Offset = 6;
+}
+
+// Count number of sensors
+message SensorCountRequest {
     int64 DeviceID = 1;
-    int64 Limit = 2;
-    int64 Offset = 3;
+    SensorType Type = 2;
+    Status Status = 3;
 }

@@ -4,12 +4,14 @@ package message;
 
 option go_package = "github.com/afairon/smeter/message";
 
+// Device/Sensor status
 enum Status {
     ALL = 0;
     ACTIVE = 1;
     INACTIVE = 2;
 }
 
+// Group by bucket time
 enum Bucket {
     HOUR = 0;
     DAY = 1;
@@ -17,3 +19,6 @@ enum Bucket {
     MONTH = 3;
     YEAR = 4;
 }
+
+// Empty message
+message Empty{}

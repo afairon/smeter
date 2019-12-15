@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package service;
 
+import "message/common.proto";
 import "message/sensor.proto";
 
 // SensorService definition
 service SensorService {
     rpc Add(message.Sensor) returns (message.Sensor);
-    rpc Get(message.SensorRequest) returns (stream message.Sensor);
+    rpc Get(message.SensorsRequest) returns (stream message.Sensor);
+    rpc Update(message.Sensor) returns (message.Empty);
+    rpc Delete(message.Sensor) returns (message.Empty);
+    rpc Count(message.SensorCountRequest) returns (message.SensorCount);
 }

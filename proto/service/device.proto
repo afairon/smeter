@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package service;
 
+import "message/common.proto";
 import "message/device.proto";
 
 // DeviceService definition
 service DeviceService{
     rpc Add(message.Device) returns (message.Device);
     rpc Get(message.DevicesRequest) returns (stream message.Device);
+    rpc Update(message.Device) returns (message.Empty);
+    rpc Delete(message.Device) returns (message.Empty);
+    rpc Count(message.DeviceCountRequest) returns (message.DeviceCount);
 }

@@ -2,15 +2,31 @@ syntax = "proto3";
 
 package message;
 
+import "message/common.proto";
+
 option go_package = "github.com/afairon/smeter/message";
 
+// Device message used to create and update
 message Device {
     int64 ID = 1;
     string Name = 2;
     bool Active = 3;
 }
 
+// Number of devices
+message DeviceCount {
+    int64 Count = 1;
+}
+
+// Request for devices
 message DevicesRequest {
-    int64 Limit = 1;
-    int64 Offset = 2;
+    int64 ID = 1;
+    Status status = 2;
+    int64 Limit = 3;
+    int64 Offset = 4;
+}
+
+// Count number of devices
+message DeviceCountRequest {
+    Status Status = 1;
 }
