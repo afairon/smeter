@@ -1,3 +1,5 @@
+GO ?= go
+LDFLAGS = "-s -w"
 PROTOC ?= protoc
 
 PROTO_MESSAGE := $(wildcard proto/message/*.proto)
@@ -10,7 +12,11 @@ CPP_MESSAGES_HEADER := $(CPP_MESSAGES:%.cc=%.h)
 CPP_SERVICES_HEADER := $(CPP_SERVICES:%.cc=%.h)
 
 # All targets needed for server
-all: ${GO_SERVICES} ${GO_MESSAGES}
+all: proto-go
+	${GO} build -ldflags=${LDFLAGS}
+
+# Generates protobuf and grpc files for golang
+proto-go: ${GO_SERVICES} ${GO_MESSAGES}
 
 # Generates protobuf and grpc files for cpp
 proto-cpp: proto/cpp ${CPP_SERVICES} ${CPP_MESSAGES}
@@ -38,6 +44,6 @@ proto/cpp/%.grpc.pb.cc: proto/service/%.proto
 		--plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $<
 
 clean:
-	rm -f ${GO_MESSAGES} ${GO_SERVICES} \
+	rm -f smeter ${GO_MESSAGES} ${GO_SERVICES} \
 		${CPP_MESSAGES} ${CPP_MESSAGES_HEADER} \
 		${CPP_SERVICES} ${CPP_SERVICES_HEADER}

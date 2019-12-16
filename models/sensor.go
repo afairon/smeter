@@ -287,6 +287,7 @@ func DeleteSensor(db *sql.DB, req *message.Sensor) error {
 
 	sql := `
 	DELETE
+	FROM
 		public.sensors
 	WHERE
 		sensors.id = $1

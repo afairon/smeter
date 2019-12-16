@@ -183,6 +183,7 @@ func DeleteDevice(db *sql.DB, req *message.Device) error {
 
 	sql := `
 	DELETE
+	FROM
 		public.devices
 	WHERE
 		devices.id = $1
